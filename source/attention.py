@@ -16,28 +16,52 @@ class Attention(nn.Module):
 
     
     def forward(self, x, mode = "vanilla"):
-        B, N, C, T = x.shape
-
         if mode == "vanilla":
-            print(self.q_w.weight.shape)
-            print(x.shape)
-            q = self.q_w(x)
-            k = self.k_w(x)
-            v = self.v_w(x)
+            return self.vanilla_attention(x)
+        elif mode == "temporal":
+            return self.temporal_attention(x, seqlen=8)
+        elif mode == "spatial":
+            return self.vanilla_attention(x)
 
-            score = (q @ k.transpose(-2, -1)) / (self.embed_size ** 0.5)
+    def vanilla_attention(self, x):
+        B, T, N = x.shape
+        q = self.q_w(x)
+        k = self.k_w(x)
+        v = self.v_w(x)
+        
+        score = (q @ k.transpose(-2, -1)) / (self.embed_size ** 0.5)
+        
+        score = F.softmax(score, dim=-1)
+        output = score @ v
+        return output
 
-            output = F.softmax(score @ v, dim=-1)
-            return output
+    def temporal_attention(self, x, seqlen=8):
+        
+        B, T, N = x.shape
+        qt = self.q_w(x).view(B, T, self.heads, self.head_dim)
+        kt = self.k_w(x).view(B, T, self.heads, self.head_dim)
+        vt = self.v_w(x).view(B, T, self.heads, self.head_dim)  
+        
+        score = (qt @ kt.transpose(-2, -1)) / (self.embed_size ** 0.5)
+        score = F.softmax(score, dim=-1)
+        output = score @ vt
+        output = output.view(B, T, N)
+        
+        print("="*100)
+        print("This is temporal", output.shape)
+        print("="*100)
+        return output
 
-        # if mode == "temporal": 
-        #     q
+        
 
-    
 
-a = Attention(embed_size=10*17*2, heads=2)
+# d_model = 64
+# embed_size = 10 *d_model
+# a = Attention(embed_size=embed_size, heads=2)
 
-x = torch.randn(2, 17, 2, 10)
+# x = torch.randn(2, 10, embed_size)
 
-print(a(x))
+# print(x.shape)
+# print(a(x, mode="temporal").shape)
+# print(a(x, mode="vanilla").shape)
 
