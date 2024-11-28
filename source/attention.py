@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn 
 import torch.nn.functional as F 
 
+device = 'cuda' if torch.cuda.is_available() == True else 'cpu'
+
 class MLPlayer(nn.Module):
     def __init__(self, embed_size, hidden_size):
         super(MLPlayer, self).__init__()
@@ -64,31 +66,46 @@ class Attention(nn.Module):
         output = output.view(B, T, N)
         
         return output
-        
-    
-    
-class Block(nn.Module): 
+
+
+class DSTFormer(nn.Module):
     def __init__(self, embed_size, heads):
-        super(Block, self).__init__()
+        super(DSTFormer, self).__init__()
         self.embed_size = embed_size
         self.heads = heads
 
-        self.attention = Attention(embed_size=embed_size, heads=heads)
-        self.mlp = MLPlayer(embed_size=embed_size, hidden_size=embed_size*4)
+        self.attention = Attention(embed_size=embed_size, heads=heads).to(device)
+        self.mlp = MLPlayer(embed_size=embed_size, hidden_size=embed_size).to(device)
+
+    def forward(self, x):
+        # DST former is a dual stream attention, (S + T) + (T + S)
+
+        s1 = self.attention(x, "spatial")
+        t1 = self.attention(s1, "temporal")
+
+        t2 = self.attention(x, "temporal")
+        s2 = self.attention(t2, "spatial")
+
+        fused = t1 + s2
+
+        output = self.mlp(fused)
+
+        return output 
+
+
+
         
-    def forward(self, x): 
-        print('before attention', x.shape)
-        x = x + self.attention(x).forward(mode="temporal")
-        print('after attention', x.shape)
-        x = x + self.mlp(x)
-        print('after mlp', x.shape)
-        return x
+
 
 d_model = 64
 embed_size = 10 *d_model
+num_heads = 8
 # a = Attention(embed_size=embed_size, heads=2)
 
-x = torch.randn(2, 10, embed_size)
-b = Block(embed_size=embed_size, heads=2)
+x = torch.randn(8, 10, embed_size).to(device)
+dst = DSTFormer(embed_size=embed_size, heads=8)
 
-print(b(x).shape)
+
+
+
+print(dst(x).shape)
