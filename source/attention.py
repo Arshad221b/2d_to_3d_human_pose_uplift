@@ -2,13 +2,29 @@ import torch
 import torch.nn as nn 
 import torch.nn.functional as F 
 
+class MLPlayer(nn.Module):
+    def __init__(self, embed_size, hidden_size):
+        super(MLPlayer, self).__init__()
+        self.embed_size = embed_size
+        self.hidden_size = hidden_size
+
+        self.fc1 = nn.Linear(self.embed_size, self.hidden_size)
+        self.fc2 = nn.Linear(self.hidden_size, self.embed_size)
+        self.dropout = nn.Dropout(0.1)
+        
+    def forward(self, x): 
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        x = self.dropout(x)
+        return x
+
 class Attention(nn.Module): 
     def __init__(self, embed_size, heads):
         super(Attention, self).__init__()
         self.embed_size = embed_size
         self.heads = heads 
         self.head_dim = embed_size // heads 
-
 
         self.q_w = nn.Linear(self.embed_size, self.embed_size, bias=False)
         self.k_w = nn.Linear(self.embed_size, self.embed_size, bias=False)
@@ -47,21 +63,32 @@ class Attention(nn.Module):
         output = score @ vt
         output = output.view(B, T, N)
         
-        print("="*100)
-        print("This is temporal", output.shape)
-        print("="*100)
         return output
-
         
+    
+    
+class Block(nn.Module): 
+    def __init__(self, embed_size, heads):
+        super(Block, self).__init__()
+        self.embed_size = embed_size
+        self.heads = heads
 
+        self.attention = Attention(embed_size=embed_size, heads=heads)
+        self.mlp = MLPlayer(embed_size=embed_size, hidden_size=embed_size*4)
+        
+    def forward(self, x): 
+        print('before attention', x.shape)
+        x = x + self.attention(x).forward(mode="temporal")
+        print('after attention', x.shape)
+        x = x + self.mlp(x)
+        print('after mlp', x.shape)
+        return x
 
-# d_model = 64
-# embed_size = 10 *d_model
+d_model = 64
+embed_size = 10 *d_model
 # a = Attention(embed_size=embed_size, heads=2)
 
-# x = torch.randn(2, 10, embed_size)
+x = torch.randn(2, 10, embed_size)
+b = Block(embed_size=embed_size, heads=2)
 
-# print(x.shape)
-# print(a(x, mode="temporal").shape)
-# print(a(x, mode="vanilla").shape)
-
+print(b(x).shape)
