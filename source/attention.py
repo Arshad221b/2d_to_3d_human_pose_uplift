@@ -89,7 +89,7 @@ class DSTFormer(nn.Module):
         fused = t1 + s2
 
         output = self.mlp(fused)
-
+ 
         return output 
 
 
@@ -104,8 +104,5 @@ num_heads = 8
 
 x = torch.randn(8, 10, embed_size).to(device)
 dst = DSTFormer(embed_size=embed_size, heads=8)
-
-
-
 
 print(dst(x).shape)
