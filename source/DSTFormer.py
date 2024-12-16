@@ -69,8 +69,14 @@ class Attention(nn.Module):
 
 
 class DSTFormer(nn.Module):
-    def __init__(self, embed_size, heads):
+    def __init__(self, dim_in=3, dim_out=3, embed_size=256, heads=2, max_len=10, num_joints=17):
         super(DSTFormer, self).__init__()
+
+        self.joint_embed = nn.Linear(dim_in, embed_size)
+
+        self.pos_embedding = nn.Parameter(torch.zeros(1, num_joints, embed_size))
+        self.temp_embedding = nn.Parameter(torch.zeros(1, max_len, 1, embed_size))
+
         self.embed_size = embed_size
         self.heads = heads
 
@@ -79,6 +85,15 @@ class DSTFormer(nn.Module):
 
     def forward(self, x):
         # DST former is a dual stream attention, (S + T) + (T + S)
+        B, F, J, C = x.shape # batch, frames, joints, channels 
+
+        x = x.reshape(-1, J, C) # merging the batch and the frames
+
+        x = self.joint_embed(x) # (C, J) x (X, J, C) = (X, J, J)
+        x = x + self.pos_embedding # (17, J) x (X, J, J) = (X, J, J)
+        _, J, C = x.shape # J changing from 3 to 64
+        x = x.reshape(-1, F, J, C) + self.temp_embedding[:, :F, :, :]
+        x = x.reshape(B*F, J, C)
 
         s1 = self.attention(x, "spatial")
         t1 = self.attention(s1, "temporal")
@@ -97,12 +112,12 @@ class DSTFormer(nn.Module):
         
 
 
-d_model = 64
-embed_size = 10 *d_model
+num_joints = 17
+embed_size = 64
 num_heads = 8
 # a = Attention(embed_size=embed_size, heads=2)
 
-x = torch.randn(8, 10, embed_size).to(device)
+x = torch.randn(8, 10, num_joints, 3).to(device)
 dst = DSTFormer(embed_size=embed_size, heads=8)
 
 print(dst(x).shape)
