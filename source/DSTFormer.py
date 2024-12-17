@@ -69,10 +69,11 @@ class Attention(nn.Module):
 
 
 class DSTFormer(nn.Module):
-    def __init__(self, dim_in=3, dim_out=3, embed_size=256, heads=2, max_len=10, num_joints=17):
+    def __init__(self, dim_in=3, dim_out=3, embed_size=256, heads=2, max_len=10, num_joints=17, fusion_depth = 5, attn_depth =2, fusion = True):
         super(DSTFormer, self).__init__()
 
         self.joint_embed = nn.Linear(dim_in, embed_size)
+        self.fusion = fusion
 
         self.pos_embedding = nn.Parameter(torch.zeros(1, num_joints, embed_size))
         self.temp_embedding = nn.Parameter(torch.zeros(1, max_len, 1, embed_size))
@@ -82,6 +83,9 @@ class DSTFormer(nn.Module):
 
         self.attention = Attention(embed_size=embed_size, heads=heads).to(device)
         self.mlp = MLPlayer(embed_size=embed_size, hidden_size=embed_size).to(device)
+        # self.fusion_model = nn.ModuleList([nn.Linear(2*embed_size, 2) for i in range(fusion_depth)])
+        self.fusion_model = nn.Linear(2*embed_size, 2)
+        self.head = nn.Linear(embed_size, dim_out)
 
     def forward(self, x):
         # DST former is a dual stream attention, (S + T) + (T + S)
@@ -101,11 +105,20 @@ class DSTFormer(nn.Module):
         t2 = self.attention(x, "temporal")
         s2 = self.attention(t2, "spatial")
 
-        fused = t1 + s2
+        if self.fusion:
+            # fusion_model = self.fusion_model()
+            alpha = torch.cat([t1, s2], dim = -1)
+            alpha = self.fusion_model(alpha)
+            alpha = alpha.softmax(-1)
+            x = t1 * alpha[:,:, 0:1] + s2 * alpha[:,:, 1:2]
+            # output = 
+            
 
-        output = self.mlp(fused)
- 
-        return output 
+        else: 
+            fused = (t1 + s2) /2
+            x = self.mlp(fused)
+        output = self.head(x)
+        return output  
 
 
 
