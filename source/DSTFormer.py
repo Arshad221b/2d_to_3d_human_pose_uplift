@@ -173,13 +173,15 @@ class DSTFormer(nn.Module):
         
 
 
-num_joints = 17
-embed_size = 64
-num_heads = 8
-# a = Attention(embed_size=embed_size, heads=2)
+# num_joints = 17
+# embed_size = 64
+# num_heads = 8
+# # a = Attention(embed_size=embed_size, heads=2)
 
-x = torch.randn(8, 10, num_joints, 3).to(device)
-dst = DSTFormer(embed_size=embed_size, heads=16)
-total_params = sum(p.numel() for p in dst.parameters())
-print(f"Number of parameters: {total_params}")
-print(dst(x).shape)
+# x = torch.randn(8, 10, num_joints, 3).to(device)
+# dst = DSTFormer(embed_size=embed_size, heads=16)
+
+# print(dst)
+# total_params = sum(p.numel() for p in dst.parameters())
+# print(f"Number of parameters: {total_params}")
+# print(dst(x).shape)
