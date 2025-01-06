@@ -111,7 +111,7 @@ class DSTFormer(nn.Module):
     def __init__(self, dim_in=3, dim_out=3, embed_size=256, heads=2, max_len=10, num_joints=17, fusion_depth = 5, attn_depth =8, fusion = True):
         super(DSTFormer, self).__init__()
 
-        self.joint_embed = nn.Linear(dim_in, embed_size).to(device)
+        self.joint_embed = nn.Linear(dim_in, embed_size, dtype=torch.float32).to(device)
         self.fusion = fusion
 
         self.pos_embedding = nn.Parameter(torch.zeros(1, num_joints, embed_size)).to(device)
@@ -130,6 +130,8 @@ class DSTFormer(nn.Module):
 
     def forward(self, x):
         # DST former is a dual stream attention, (S + T) + (T + S)
+        # print(x.shape)
+        x = x.to(device)
         B, F, J, C = x.shape # batch, frames, joints, channels 
 
         x = x.reshape(-1, J, C) # merging the batch and the frames
