@@ -79,6 +79,7 @@
 DSTFormer, inspired by the MotionBERT paper (Zhu et al., 2022), is a transformer-based architecture for human pose estimation that leverages dual-stream attention mechanisms to capture both spatial and temporal dependencies in human motion sequences. The model implements a novel fusion approach between spatial-temporal (ST) and temporal-spatial (TS) attention streams.
 
 ## Architecture
+![DSTformer](https://github.com/Arshad221b/2d_to_3d_pose_uplift/blob/main/screenshot/Screenshot%202025-01-25%20at%203.18.19%E2%80%AFPM.png)
 
 ### Core Components
 - **Dual Stream Processing**: Parallel processing of ST and TS attention streams
