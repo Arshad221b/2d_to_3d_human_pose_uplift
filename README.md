@@ -205,13 +205,14 @@ The fusion layer in DSTFormer combines the outputs from both spatial-temporal (S
 - Training time: Dependent on hardware configuration
 
 ## Directory Structure
+```
 source/
 ├── DataLoaders.py     # Data loading and processing
 ├── DSTFormer.py       # Main model architecture
 ├── pre_train.py       # Pre-training script
 ├── train.py           # Fine-tuning script
 └── loss_function.py   # Loss functions
-
+```
 ## Usage
 
 ### Data Preparation
