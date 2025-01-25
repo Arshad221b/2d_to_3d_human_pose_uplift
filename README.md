@@ -1,4 +1,7 @@
 # 2D to 3D Human Pose Estimation
+
+![DSTformer](https://github.com/Arshad221b/2d_to_3d_pose_uplift/blob/main/screenshot/Screenshot%202025-01-25%20at%203.18.19%E2%80%AFPM.png)
+
 ## Table of Contents
 
 - [Motivation & Implementation Goals](#motivation--implementation-goals)
