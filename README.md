@@ -115,6 +115,8 @@ DSTFormer(
 - Sequence splitting into fixed-length windows
 - Optional masking mechanism (15% probability) for training
 - Batch collation with support for masked and unmasked data
+- Refer this data: [AMASS](https://huggingface.co/datasets/tuguobin/AMASS)
+- Unofficial pre-processed dataset: [Huggingface](https://huggingface.co/datasets/tuguobin/AMASS)
 
 ## Training
 ### Pre-training
