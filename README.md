@@ -84,6 +84,8 @@ DSTFormer, inspired by the MotionBERT paper (Zhu et al., 2022), is a transformer
 - **Position Encoding**: Joint-wise positional embeddings and temporal embeddings
 
 ### Model Specifications
+
+```
 DSTFormer(
     dim_in=2,              # Input dimension per joint
     dim_out=2,             # Output dimension per joint
@@ -95,6 +97,7 @@ DSTFormer(
     attn_depth=2,          # Depth of attention layers
     fusion=True           # Enable fusion mechanism
 )
+```
 
 ## Data Pipeline
 
