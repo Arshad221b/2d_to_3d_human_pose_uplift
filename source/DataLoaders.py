@@ -77,30 +77,3 @@ def collate_fn(batch, dataset, mask_prob=0.15):
         torch.cat(targets, dim=0).to(torch.float32),
     )
 
-
-
-# path = '/teamspace/studios/this_studio/data/AMASS/AMASS/amass_joints_h36m_60.pkl'
-# # data = DataLoader.main(path, 1000)
-
-# dataset = Dataset(path, 500)
-
-
-# # train_loader = torch.utils.data.DataLoader(dataset, batch_size=16, shuffle=True, collate_fn=dataset.collate_fn)
-
-# # for vidoes, target in train_loader: 
-# #     print(vidoes.shape, target.shape)
-# #     break
-
-# # dataloader = DataLoader(dataset, collate_fn=lambda batch: collate_fn(batch, dataset))
-# dataloader = TorchDataLoader(
-#     dataset,
-#     batch_size=4,
-#     collate_fn=lambda batch: collate_fn(batch, dataset)
-# )
-
-
-# # Iterate through the DataLoader
-# for videos, targets in dataloader:
-#     print("Videos shape:", videos.shape)
-#     print("Targets shape:", targets.shape)
-#     break
